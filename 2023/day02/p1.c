@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -11,18 +12,18 @@
 
 typedef struct {
     int red;
-    int blue;
-    int green;
+    int blue; 
+    int green; 
 } Game;
 
 int main(int argc, char* argv[]) {
     FILE *fptr;
-    char *contents[5], buffer[200];
+    char *contents[100], buffer[200];
     int num_games = 0,
         id_sum = 0;
 
     // open file
-    fptr = fopen(TEST, "r");
+    fptr = fopen(INPUT, "r");
 
     // check if file was opened
     if (fptr == NULL) {
@@ -33,7 +34,7 @@ int main(int argc, char* argv[]) {
     // get contents of file
     while (fgets(buffer, sizeof(buffer), fptr)) {
         // allocate memory for the string
-        contents[num_games] = (char*)malloc(sizeof(char)*sizeof(buffer));
+        contents[num_games] = (char*)malloc(sizeof(buffer));
         strcpy(contents[num_games], buffer);
 
         num_games++;
@@ -41,7 +42,6 @@ int main(int argc, char* argv[]) {
 
     // close file
     fclose(fptr);
-
 
     /* 
      * Loop through the list of games
@@ -53,11 +53,50 @@ int main(int argc, char* argv[]) {
      * Print sum of ids 
      */
 
+    Game game;
+    char digits[2], color[5];
+    int pos, idx;
+
     for (int i = 0; i < num_games; i++){
-        for (int j = 9; j < strlen(contents[i]); j++) {
-            
+        idx = 0;
+        while(contents[i][idx] != ':') {
+            idx++;
         }
+
+        game.red = game.blue = game.green = 0;
+        while (strlen(contents[i]) + 1 > idx) {
+
+            // If current char is a digit, add it to the digits array
+            if (isdigit(contents[i][idx])) {
+                pos = strlen(digits);
+                digits[pos] = contents[i][idx];
+                
+            // If current char is a letter, add it to the color array
+            } else if (isalpha(contents[i][idx])) {
+                pos = strlen(color);
+                color[pos] = contents[i][idx];
+
+            // Means we got a cube, need the number and color
+            } else if (contents[i][idx] == ',' || contents[i][idx] == ';' || idx == strlen(contents[i])) {
+                if (strcmp(color, "red") == 0) {
+                    game.red += atoi(digits);
+                } else if (strcmp(color, "green") == 0) {
+                    game.green += atoi(digits);
+                } else if (strcmp(color, "blue") == 0) {
+                    game.blue += atoi(digits);
+                }
+
+                memset(digits, '\0', sizeof(digits));
+                memset(color, '\0', sizeof(color));
+            }
+
+            idx++;
+        }
+
+
     }
+
+    printf("%d\n", id_sum);
 
     return 0;
 }
