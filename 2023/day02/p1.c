@@ -14,6 +14,8 @@ typedef struct {
     int red;
     int blue; 
     int green; 
+
+    int valid;
 } Game;
 
 int main(int argc, char* argv[]) {
@@ -54,7 +56,7 @@ int main(int argc, char* argv[]) {
      */
 
     Game game;
-    char digits[2], color[5];
+    char digits[2], color[6];
     int pos, idx;
 
     for (int i = 0; i < num_games; i++){
@@ -64,6 +66,8 @@ int main(int argc, char* argv[]) {
         }
 
         game.red = game.blue = game.green = 0;
+        game.valid = 1;
+
         while (strlen(contents[i]) + 1 > idx) {
 
             // If current char is a digit, add it to the digits array
@@ -77,7 +81,7 @@ int main(int argc, char* argv[]) {
                 color[pos] = contents[i][idx];
 
             // Means we got a cube, need the number and color
-            } else if (contents[i][idx] == ',' || contents[i][idx] == ';' || idx == strlen(contents[i])) {
+            } else if (contents[i][idx] == ',') {
                 if (strcmp(color, "red") == 0) {
                     game.red += atoi(digits);
                 } else if (strcmp(color, "green") == 0) {
@@ -88,11 +92,32 @@ int main(int argc, char* argv[]) {
 
                 memset(digits, '\0', sizeof(digits));
                 memset(color, '\0', sizeof(color));
+
+            } else if (contents[i][idx] == ';' || idx == strlen(contents[i])) {
+                if (strcmp(color, "red") == 0) {
+                    game.red += atoi(digits);
+                } else if (strcmp(color, "green") == 0) {
+                    game.green += atoi(digits);
+                } else if (strcmp(color, "blue") == 0) {
+                    game.blue += atoi(digits);
+                }
+
+                memset(digits, '\0', sizeof(digits));
+                memset(color, '\0', sizeof(color));
+
+                if (game.red > MAX_RED || game.blue > MAX_BLUE || game.green > MAX_GREEN) {
+                    game.valid = 0;
+                }
+
+                game.red = game.blue = game.green = 0;
             }
 
             idx++;
         }
 
+        if (game.valid == 1) {
+            id_sum += i + 1;
+        }
 
     }
 
